@@ -20,8 +20,6 @@ const nutriologo = obtenerSesion();
 
 if (!nutriologo) {
 
-  alert("Acceso bloqueado. Debes iniciar sesión.");
-
   window.location.href = "index.html";
 }
 
@@ -71,6 +69,7 @@ document
    FUNCIONES GLOBALES
 ========================= */
 window.editarConsulta = editarConsulta;
+
 window.eliminarConsulta = eliminarConsulta;
 
 /* =========================
@@ -100,20 +99,10 @@ function cerrarSesion() {
 ========================= */
 function eliminarTodo() {
 
-  const confirmar = confirm(
-    "¿Seguro que deseas eliminar TODOS los datos?"
-  );
-
-  if (!confirmar) {
-    return;
-  }
-
   /* BORRAR LOCALSTORAGE */
   localStorage.removeItem("pacientes");
 
   localStorage.removeItem("consultas");
-
-  alert("Todos los datos fueron eliminados.");
 
   location.reload();
 }

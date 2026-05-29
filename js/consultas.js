@@ -1,16 +1,6 @@
-import {
-  obtenerSesion,
-  obtenerConsultas,
-  guardarConsultas
-} from "./storage.js";
+import { obtenerSesion, obtenerConsultas, guardarConsultas } from "./storage.js";
+import { obtenerPacientePorId } from "./pacientes.js";
 
-import {
-  obtenerPacientePorId
-} from "./pacientes.js";
-
-/* =========================
-   VARIABLE GLOBAL EDITAR
-========================= */
 let consultaEditandoId = null;
 
 /* =========================
@@ -20,17 +10,13 @@ export function colocarFechaHoraActual() {
 
   const ahora = new Date();
 
-  const fecha =
-    ahora.toISOString().split("T")[0];
+  const fecha = ahora.toISOString().split("T")[0];
 
-  const hora =
-    ahora.toTimeString().slice(0, 5);
+  const hora = ahora.toTimeString().slice(0, 5);
 
-  document.getElementById("fecha").value =
-    fecha;
+  document.getElementById("fecha").value = fecha;
 
-  document.getElementById("hora").value =
-    hora;
+  document.getElementById("hora").value = hora;
 }
 
 /* =========================
@@ -53,7 +39,6 @@ export function guardarConsulta() {
   const plan =
     document.getElementById("plan").value.trim();
 
-  /* VALIDAR CAMPOS */
   if (
     !idPaciente ||
     !fecha ||
@@ -61,9 +46,6 @@ export function guardarConsulta() {
     !evolucion ||
     !plan
   ) {
-
-    alert("Completa todos los datos.");
-
     return;
   }
 
@@ -72,7 +54,7 @@ export function guardarConsulta() {
   /* =========================
      EDITAR CONSULTA
   ========================= */
-  if (consultaEditandoId !== null) {
+  if (consultaEditandoId != null) {
 
     consultas = consultas.map((consulta) => {
 
@@ -90,52 +72,42 @@ export function guardarConsulta() {
       return consulta;
     });
 
-    guardarConsultas(consultas);
-
     consultaEditandoId = null;
 
     document.getElementById(
       "btnGuardarConsulta"
     ).textContent = "Guardar consulta";
 
-    limpiarFormularioConsulta();
+  } else {
 
-    mostrarHistorial();
+    /* =========================
+       NUEVA CONSULTA
+    ========================= */
+    const nuevaConsulta = {
 
-    alert("Consulta actualizada correctamente.");
+      id: Date.now(),
 
-    return;
+      idPaciente: Number(idPaciente),
+
+      fecha,
+
+      hora,
+
+      evolucion,
+
+      plan,
+
+      nutriologo: obtenerSesion()
+    };
+
+    consultas.push(nuevaConsulta);
   }
-
-  /* =========================
-     NUEVA CONSULTA
-  ========================= */
-  const nuevaConsulta = {
-
-    id: Date.now(),
-
-    idPaciente: Number(idPaciente),
-
-    fecha,
-
-    hora,
-
-    evolucion,
-
-    plan,
-
-    nutriologo: obtenerSesion()
-  };
-
-  consultas.push(nuevaConsulta);
 
   guardarConsultas(consultas);
 
   limpiarFormularioConsulta();
 
   mostrarHistorial();
-
-  alert("Consulta guardada correctamente.");
 }
 
 /* =========================
@@ -167,22 +139,19 @@ export function mostrarHistorial() {
     return;
   }
 
-  /* DATOS PACIENTE */
+  /* =========================
+     DATOS PACIENTE
+  ========================= */
   datosPaciente.innerHTML = `
-    <p><strong>Paciente:</strong>
-    ${paciente.nombre}</p>
+    <p><strong>Paciente:</strong> ${paciente.nombre}</p>
 
-    <p><strong>Edad:</strong>
-    ${paciente.edad} años</p>
+    <p><strong>Edad:</strong> ${paciente.edad} años</p>
 
-    <p><strong>Peso:</strong>
-    ${paciente.peso} kg</p>
+    <p><strong>Peso:</strong> ${paciente.peso} kg</p>
 
-    <p><strong>Altura:</strong>
-    ${paciente.altura} m</p>
+    <p><strong>Altura:</strong> ${paciente.altura} m</p>
 
-    <p><strong>IMC:</strong>
-    ${paciente.imc}</p>
+    <p><strong>IMC:</strong> ${paciente.imc}</p>
 
     <p class="diagnostico">
       <strong>Diagnóstico:</strong>
@@ -193,10 +162,12 @@ export function mostrarHistorial() {
   const consultas = obtenerConsultas();
 
   const consultasPaciente = consultas
+
     .filter(
       (consulta) =>
         consulta.idPaciente == idPaciente
     )
+
     .sort((a, b) => {
 
       const fechaA =
@@ -208,7 +179,6 @@ export function mostrarHistorial() {
       return fechaB - fechaA;
     });
 
-  /* SIN CONSULTAS */
   if (consultasPaciente.length === 0) {
 
     historialConsultas.innerHTML =
@@ -217,7 +187,9 @@ export function mostrarHistorial() {
     return;
   }
 
-  /* MOSTRAR CONSULTAS */
+  /* =========================
+     MOSTRAR CONSULTAS
+  ========================= */
   consultasPaciente.forEach((consulta) => {
 
     const div = document.createElement("div");
@@ -225,20 +197,31 @@ export function mostrarHistorial() {
     div.classList.add("consulta");
 
     div.innerHTML = `
-      <p><strong>Fecha:</strong>
-      ${consulta.fecha}</p>
 
-      <p><strong>Hora:</strong>
-      ${consulta.hora}</p>
+      <p>
+        <strong>Fecha:</strong>
+        ${consulta.fecha}
+      </p>
 
-      <p><strong>Nutriólogo:</strong>
-      ${consulta.nutriologo}</p>
+      <p>
+        <strong>Hora:</strong>
+        ${consulta.hora}
+      </p>
 
-      <p><strong>Evolución:</strong>
-      ${consulta.evolucion}</p>
+      <p>
+        <strong>Nutriólogo:</strong>
+        ${consulta.nutriologo}
+      </p>
 
-      <p><strong>Plan de alimentación:</strong>
-      ${consulta.plan}</p>
+      <p>
+        <strong>Evolución:</strong>
+        ${consulta.evolucion}
+      </p>
+
+      <p>
+        <strong>Plan de alimentación:</strong>
+        ${consulta.plan}
+      </p>
 
       <button onclick="editarConsulta(${consulta.id})">
         Editar
@@ -261,17 +244,13 @@ export function mostrarHistorial() {
 ========================= */
 export function editarConsulta(id) {
 
-  const consultas =
-    obtenerConsultas();
+  const consultas = obtenerConsultas();
 
   const consulta = consultas.find(
     (consulta) => consulta.id == id
   );
 
   if (!consulta) {
-
-    alert("No se encontró la consulta.");
-
     return;
   }
 
@@ -287,16 +266,11 @@ export function editarConsulta(id) {
   document.getElementById("plan").value =
     consulta.plan;
 
-  consultaEditandoId = consulta.id;
+  consultaEditandoId = id;
 
   document.getElementById(
     "btnGuardarConsulta"
   ).textContent = "Guardar cambios";
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
 }
 
 /* =========================
@@ -304,16 +278,7 @@ export function editarConsulta(id) {
 ========================= */
 export function eliminarConsulta(id) {
 
-  const confirmar = confirm(
-    "¿Deseas eliminar esta consulta?"
-  );
-
-  if (!confirmar) {
-    return;
-  }
-
-  let consultas =
-    obtenerConsultas();
+  let consultas = obtenerConsultas();
 
   consultas = consultas.filter(
     (consulta) => consulta.id != id
@@ -322,8 +287,6 @@ export function eliminarConsulta(id) {
   guardarConsultas(consultas);
 
   mostrarHistorial();
-
-  alert("Consulta eliminada correctamente.");
 }
 
 /* =========================
